@@ -1,0 +1,16 @@
+project_id = "esbniqtvjywnlzfabwoa"
+
+[functions.send-invoice-email]
+verify_jwt = true
+
+[functions.send-invoice-sms]
+verify_jwt = true
+
+[functions.get-invoice-public]
+verify_jwt = false
+
+[functions.invoice-share-toggle]
+verify_jwt = true
+
+[functions.track-invoice-link-open]
+verify_jwt = false

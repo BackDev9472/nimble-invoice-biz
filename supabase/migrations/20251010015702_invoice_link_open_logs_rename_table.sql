@@ -1,0 +1,1 @@
+ALTER TABLE public.link_open_logs RENAME TO invoice_link_open_logs;

@@ -22,3 +22,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+
+# Coverage directory
+coverage/
+.coverage/
+*.lcov
+
+# Istanbul coverage
+.nyc_output/
+
+# Jest coverage
+jest-coverage/
+
+# HTML reports
+html-report/
+
+
+supabase/.temp/
