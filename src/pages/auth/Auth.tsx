@@ -82,16 +82,12 @@ const Auth = () => {
     signOut({ clearDevice: false }), setMode("login");
   };
 
-  const handleSkipMfaSetup = () => {
-    navigate("/");
-  };
-
   if (mode == "MfaSetup")
     return (
       <div className="min-h-screen flex items-center justify-center p-8 bg-background">
         <MfaSetup
           onSuccess={handleMfaSetupComplete}
-          onSkip={handleSkipMfaSetup}
+          onSkip={handleBackToLogin}
         />
       </div>
     );
