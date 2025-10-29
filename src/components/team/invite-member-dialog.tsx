@@ -39,6 +39,35 @@ export function InviteMemberDialog({ onMemberInvited }: InviteMemberDialogProps)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-team-invite-email', {
+        body: {
+          recipientEmail: formData.email,
+          recipientName: formData.name,
+          role: formData.role,
+          // inviteToken: invoice.id,
+          // inviterName: user.
+        }
+      })
+
+      if (emailError) {
+        console.error("Error sending email:", emailError);
+        toast({
+          title: "Error",
+          description: "Failed to send email",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!emailResult?.success) {
+        toast({
+          title: "Error",
+          description: "Failed to send email",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("team_members")
         .insert({

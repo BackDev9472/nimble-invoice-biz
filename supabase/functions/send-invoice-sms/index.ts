@@ -13,7 +13,7 @@ const corsHeaders = {
 interface InvoiceItem {
   description: string;
   quantity: number;
-  rate: number;
+  unit_price: number;
   amount: number;
 }
 
@@ -65,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Format items for SMS
     const itemsList = items.map((item, index) => 
-      `${index + 1}. ${item.description} (${item.quantity}x $${item.rate.toFixed(2)}) = $${item.amount.toFixed(2)}`
+      `${index + 1}. ${item.description} (${item.quantity}x $${item.unit_price.toFixed(2)}) = $${item.amount.toFixed(2)}`
     ).join('\n');
 
     // Construct detailed SMS message

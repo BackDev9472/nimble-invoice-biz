@@ -55,11 +55,8 @@ export const MfaVerify = ({
       }
 
       // If remember device is checked, store the device token
-      if (rememberDevice) {
-        const userId = result.data?.user?.id;
-        if (userId) {
-          await storeDeviceToken(userId);
-        }
+      if (rememberDevice && result.data?.user) {
+        storeDeviceToken(result.data.user.id);
       }
 
       toast({

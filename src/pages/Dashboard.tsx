@@ -1,61 +1,25 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InvoiceStatusBadge } from "@/components/invoice/invoice-status-badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
+import { sampleInvoices } from "@/data/sample-data";
 import { FileText, Users, DollarSign, Clock, Plus, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+import heroImage from "@/assets/invoice-hero.jpg";
 
 const Dashboard = () => {
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('invoices')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching invoices:', error);
-        } else {
-          setInvoices(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching invoices:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInvoices();
-  }, [user]);
-
-  const calculateTotal = (items: any[]) => {
-    if (!items || !Array.isArray(items)) return 0;
-    return items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-  };
-
-  const totalRevenue = invoices
+  const totalRevenue = sampleInvoices
     .filter(invoice => invoice.status === 'paid')
-    .reduce((sum, invoice) => sum + calculateTotal(invoice.items), 0);
+    .reduce((sum, invoice) => sum + invoice.total, 0);
   
-  const pendingAmount = invoices
+  const pendingAmount = sampleInvoices
     .filter(invoice => invoice.status === 'sent')
-    .reduce((sum, invoice) => sum + calculateTotal(invoice.items), 0);
+    .reduce((sum, invoice) => sum + invoice.total, 0);
   
-  const overdueAmount = invoices
+  const overdueAmount = sampleInvoices
     .filter(invoice => invoice.status === 'overdue')
-    .reduce((sum, invoice) => sum + calculateTotal(invoice.items), 0);
+    .reduce((sum, invoice) => sum + invoice.total, 0);
 
-  const recentInvoices = invoices.slice(0, 3);
+  const recentInvoices = sampleInvoices.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,7 +83,7 @@ const Dashboard = () => {
                       <Users className="h-4 w-4 text-blue-400" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-blue-400">{invoices.length}</div>
+                      <div className="text-2xl font-bold text-blue-400">{sampleInvoices.length}</div>
                       <p className="text-xs text-white/70">All time</p>
                     </CardContent>
                   </Card>
@@ -172,7 +136,7 @@ const Dashboard = () => {
                   <Users className="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{invoices.length}</div>
+                  <div className="text-2xl font-bold text-blue-600">{sampleInvoices.length}</div>
                   <p className="text-xs text-muted-foreground">All time</p>
                 </CardContent>
               </Card>
@@ -189,50 +153,31 @@ const Dashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="text-center py-12">
-                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading invoices...</p>
-                  </div>
-                ) : recentInvoices.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No invoices yet</h3>
-                    <p className="text-muted-foreground mb-4">Get started by creating your first invoice</p>
-                    <Button asChild size="lg">
-                      <Link to="/invoices/new">
-                        <Plus className="w-5 h-5 mr-2" />
-                        Create Invoice
-                      </Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recentInvoices.map((invoice) => (
-                      <div
-                        key={invoice.id}
-                        className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{invoice.number}</div>
-                            <div className="text-sm text-muted-foreground">Invoice #{invoice.id}</div>
-                          </div>
+                <div className="space-y-4">
+                  {recentInvoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-primary" />
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <InvoiceStatusBadge status={invoice.status} />
-                          <div className="text-right">
-                            <div className="font-medium">${calculateTotal(invoice.items).toLocaleString()}</div>
-                            <div className="text-sm text-muted-foreground">Due {new Date(invoice.due_date).toLocaleDateString()}</div>
-                          </div>
+                        <div>
+                          <div className="font-medium">{invoice.number}</div>
+                          <div className="text-sm text-muted-foreground">{invoice.client.name}</div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div className="flex items-center space-x-4">
+                        <InvoiceStatusBadge status={invoice.status} />
+                        <div className="text-right">
+                          <div className="font-medium">${invoice.total.toLocaleString()}</div>
+                          <div className="text-sm text-muted-foreground">Due {invoice.due_date}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </section>

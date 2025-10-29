@@ -11,7 +11,7 @@ import {
 
 export const SupabaseAuthService = (parm: {
   supabase: SupabaseClient<any>;
-  isDeviceRemembered: (userId: string) => Promise<boolean>;
+  isDeviceRemembered: (userId: string) => boolean;
 }): IAuthService => {
   const supabase = parm.supabase;
   const isDeviceRemembered = parm.isDeviceRemembered;
@@ -376,7 +376,7 @@ export const SupabaseAuthService = (parm: {
   async function _determineMfaState(
     supabase: SupabaseClient<any>,
     userId: string,
-    isDeviceRemembered: (userId: string) => Promise<boolean>
+    isDeviceRemembered: (userId: string) => boolean
   ): Promise<{
     needsMfa: boolean;
     challengeId?: string;
@@ -385,7 +385,7 @@ export const SupabaseAuthService = (parm: {
     // 1️⃣ Check if the device is remembered
     // Supabase can remember a device, which means the user does NOT need MFA.
     // If the device is remembered, we skip MFA entirely.
-    if (await isDeviceRemembered(userId)) {
+    if (isDeviceRemembered(userId)) {
       return { needsMfa: false };
     }
 

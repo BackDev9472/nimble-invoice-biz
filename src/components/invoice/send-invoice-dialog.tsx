@@ -182,8 +182,8 @@ export function SendInvoiceDialog({
       // Calculate invoice totals
       const items = (invoice?.items as InvoiceItem[]) || [];
       const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-      const taxRate = (invoice?.tax_rate || 0) * 100;
-      const taxAmount = subtotal * taxRate;
+      const taxRate = invoice?.tax_rate || 0;
+      const taxAmount = subtotal * (taxRate / 100);
       const total = subtotal + taxAmount;
 
       // Get current website URL for payment link
