@@ -39,21 +39,42 @@ export function InviteMemberDialog({ onMemberInvited }: InviteMemberDialogProps)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Get inviter name from user metadata or email
+      const inviterName = user.user_metadata?.display_name || user.email?.split('@')[0] || 'Team Admin';
+      const companyName = user.user_metadata?.company_name;
+
+      // Create invitation record and get token
+      const { data: invitation, error: inviteError } = await (supabase as any)
+        .from("team_invitations")
+        .insert({
+          email: formData.email,
+          name: formData.name,
+          role: formData.role,
+          invited_by: user.id,
+          company_name: companyName
+        })
+        .select()
+        .single();
+
+      if (inviteError) throw inviteError;
+
+      // Send invitation email
       const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-team-invite-email', {
         body: {
           recipientEmail: formData.email,
           recipientName: formData.name,
           role: formData.role,
-          // inviteToken: invoice.id,
-          // inviterName: user.
+          inviteToken: invitation.invite_token,
+          inviterName: inviterName,
+          companyName: companyName
         }
-      })
+      });
 
       if (emailError) {
         console.error("Error sending email:", emailError);
         toast({
           title: "Error",
-          description: "Failed to send email",
+          description: "Failed to send invitation email",
           variant: "destructive",
         });
         return;
@@ -62,27 +83,15 @@ export function InviteMemberDialog({ onMemberInvited }: InviteMemberDialogProps)
       if (!emailResult?.success) {
         toast({
           title: "Error",
-          description: "Failed to send email",
+          description: "Failed to send invitation email",
           variant: "destructive",
         });
         return;
       }
 
-      const { error } = await supabase
-        .from("team_members")
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          role: formData.role,
-          invited_by: user.id,
-          user_id: user.id // For now, using same user_id, in real app this would be different
-        });
-
-      if (error) throw error;
-
       toast({
         title: "Success",
-        description: `Invitation sent to ${formData.name}`,
+        description: `Invitation sent to ${formData.email}`,
       });
 
       setFormData({ name: "", email: "", role: "" });
