@@ -84,8 +84,8 @@ export const MfaSetup = ({ onSuccess, onSkip }: MfaSetupProps) => {
     }
 
     // If remember device is checked, store the device token
-    if (rememberDevice && result.data?.user) {
-      storeDeviceToken(result.data.user.id);
+    if (rememberDevice && user?.id) {
+      await storeDeviceToken(user.id);
     }
 
     toast({

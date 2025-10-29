@@ -15,7 +15,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
     __mockAuthHelpers.reset();
     supabaseAuthService = SupabaseAuthService({
       supabase: mockSupabaseClient as any,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
   });
 
@@ -66,7 +66,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: badSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.signUp({
@@ -88,7 +88,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.signUp({
@@ -131,7 +131,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: badSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.signOut();
@@ -158,7 +158,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const state = await service.getAuthState();
@@ -174,7 +174,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.getAuthState();
@@ -206,7 +206,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const state = await service.getAuthState();
@@ -235,7 +235,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => true,
+      isDeviceRemembered: async () => true,
     });
 
     const state = await service.getAuthState();
@@ -255,7 +255,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     vi.spyOn(service, "getAuthState").mockRejectedValueOnce(new Error("boom"));
@@ -307,7 +307,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: badSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.verifyMfaTotp({
@@ -333,7 +333,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: badSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.enrollMfaTotp();
@@ -351,7 +351,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: badSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.verifyMfaTotp({
@@ -375,7 +375,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.listFactors();
@@ -395,7 +395,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.challenge({ factorId: "f1" });
@@ -415,7 +415,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.challenge({ factorId: "f1" });
@@ -430,7 +430,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => true,
+      isDeviceRemembered: async () => true,
     });
 
     const result = await (service as any).private._determineMfaState(
@@ -460,7 +460,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await (service as any).private._determineMfaState(
@@ -491,7 +491,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     await expect(
@@ -517,7 +517,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await (service as any).private._determineMfaState(
@@ -540,7 +540,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     await expect(
@@ -607,7 +607,7 @@ describe("SupabaseAuthService (DI) (MSW v2)", () => {
 
     const service = SupabaseAuthService({
       supabase: mockSupabase,
-      isDeviceRemembered: () => false,
+      isDeviceRemembered: async () => false,
     });
 
     const result = await service.resetPasswordForEmail({
