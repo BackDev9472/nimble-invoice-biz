@@ -17,7 +17,7 @@ const Settings = () => {
       title: "Company",
       description: "Manage company information, branding, and business details",
       icon: Building2,
-      href: "/settings/company",
+      href: "/companies",
     },
     {
       title: "Personal",

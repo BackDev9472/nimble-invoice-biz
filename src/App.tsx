@@ -24,6 +24,7 @@ import Balance from "./pages/Balance";
 import ResetPassword from "./pages/auth/ResetPassword";
 import CompanySettings from "./pages/CompanySettings";
 import PersonalSettings from "./pages/PersonalSettings";
+import CompanyManagement from "./pages/CompanyManagement";
 import EditInvoice from "./pages/EditInvoice";
 import Auth from './pages/auth/Auth';
 import ConfirmEmailPage from './pages/auth/ConfirmEmail';
@@ -37,7 +38,7 @@ function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between border-b bg-secondary px-4">
       <div className="flex items-center space-x-4">
         <Logo size="md" />
-        {role && <RoleBadge role={role} />}
+        {role && <RoleBadge role={role} /> }
       </div>
       <SidebarTrigger className="lg:hidden" />
     </header>
@@ -77,7 +78,9 @@ const App = () => (
                         <Route path="/contacts" element={<PermissionRoute permission="manageContacts"><Contacts /></PermissionRoute>} />
                         <Route path="/balance" element={<ProtectedRoute><Balance /></ProtectedRoute>} />
                         <Route path="/settings" element={<PermissionRoute permission="manageSettings"><Settings /></PermissionRoute>} />
-                        <Route path="/settings/company" element={<ProtectedRoute><CompanySettings /></ProtectedRoute>} />
+                        {/* <Route path="/settings/company" element={<ProtectedRoute><CompanySettings /></ProtectedRoute>} /> */}
+                        <Route path="/companies" element={<ProtectedRoute><CompanyManagement /></ProtectedRoute>} />
+                        <Route path="/settings/company/:id" element={<ProtectedRoute><CompanySettings /></ProtectedRoute>} />
                         <Route path="/settings/personal" element={<ProtectedRoute><PersonalSettings /></ProtectedRoute>} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>

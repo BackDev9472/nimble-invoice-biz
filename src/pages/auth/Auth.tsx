@@ -27,6 +27,7 @@ const Auth = () => {
     mfaChallengeId,
     mfaFactorId,
     signOut,
+    setUserAuthStatus
   } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -78,8 +79,10 @@ const Auth = () => {
     setResetForm(resetForm + 1);
   };
 
-  const handleBackToLogin = () => {
-    signOut({ clearDevice: false }), setMode("login");
+  const handleSkip = () => {
+    setUserAuthStatus('authenticated')
+    // navigate("/");
+    // signOut({ clearDevice: false }), setMode("login");
   };
 
   if (mode == "MfaSetup")
@@ -87,7 +90,7 @@ const Auth = () => {
       <div className="min-h-screen flex items-center justify-center p-8 bg-background">
         <MfaSetup
           onSuccess={handleMfaSetupComplete}
-          onSkip={handleBackToLogin}
+          onSkip={handleSkip}
         />
       </div>
     );
@@ -99,7 +102,7 @@ const Auth = () => {
           challengeId={mfaChallengeId}
           factorId={mfaFactorId}
           onSuccess={handleMfaVerifyComplete}
-          onBack={handleBackToLogin}
+          onBack={handleSkip}
         />
       </div>
     );

@@ -8,6 +8,7 @@ import { UserPlus } from "lucide-react";
 import { UserRole } from "@/data/team-data";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 interface InviteMemberDialogProps {
   onMemberInvited: () => void;
@@ -40,18 +41,18 @@ export function InviteMemberDialog({ onMemberInvited }: InviteMemberDialogProps)
       if (!user) throw new Error("Not authenticated");
 
       // Get inviter name from user metadata or email
-      const inviterName = user.user_metadata?.display_name || user.email?.split('@')[0] || 'Team Admin';
+      const inviterName = user.user_metadata?.display_name;
       const companyName = user.user_metadata?.company_name;
 
       // Create invitation record and get token
       const { data: invitation, error: inviteError } = await (supabase as any)
-        .from("team_invitations")
+        .from("team_members")
         .insert({
           email: formData.email,
           name: formData.name,
           role: formData.role,
           invited_by: user.id,
-          company_name: companyName
+          invitation_token: uuidv4()
         })
         .select()
         .single();

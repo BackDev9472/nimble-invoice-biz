@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Building2, Save, Upload } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 interface CompanyFormData {
   company_name: string;
@@ -29,6 +29,9 @@ interface CompanyFormData {
 const CompanySettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isNewCompany = id === "new";
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
@@ -64,11 +67,17 @@ const CompanySettings = () => {
     const loadCompanyData = async () => {
       if (!user) return;
 
+      if (isNewCompany) {
+        setIsLoadingData(false);
+        return;
+      }
+
       try {
         const { data: company, error } = await supabase
           .from('companies')
           .select('*')
           .eq('user_id', user.id)
+          .eq('id', id!)
           .single();
 
         if (error && error.code !== 'PGRST116') {
@@ -94,7 +103,7 @@ const CompanySettings = () => {
     };
 
     loadCompanyData();
-  }, [user, setValue, toast]);
+  }, [user, id, isNewCompany, setValue, toast]);
 
   const onSubmit = async (data: CompanyFormData) => {
     if (!user) return;
@@ -102,25 +111,7 @@ const CompanySettings = () => {
     setIsLoading(true);
 
     try {
-      // Check if company exists
-      const { data: existingCompany } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (existingCompany) {
-        // Update existing company
-        const { error } = await supabase
-          .from('companies')
-          .update({
-            ...data,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-      } else {
+      if (isNewCompany || !id) {
         // Create new company
         const { error } = await supabase
           .from('companies')
@@ -130,12 +121,32 @@ const CompanySettings = () => {
           });
 
         if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Company created successfully.",
+        });
+      } else {
+        // Update existing company
+        const { error } = await supabase
+          .from('companies')
+          .update({
+            ...data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Company information updated successfully.",
+        });
       }
 
-      toast({
-        title: "Success",
-        description: "Company information updated successfully.",
-      });
+      // Navigate back to company management
+      navigate('/companies');
     } catch (error) {
       console.error('Error saving company:', error);
       toast({
@@ -172,6 +183,31 @@ const CompanySettings = () => {
     );
   }
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, ""); // keep only numbers
+    if (!digits) return "";
+    const part1 = digits.substring(0, 3);
+    const part2 = digits.substring(3, 6);
+    const part3 = digits.substring(6, 10);
+    if (digits.length <= 3) return `(${part1}`;
+    if (digits.length <= 6) return `(${part1}) ${part2}`;
+    return `(${part1}) ${part2}-${part3}`;
+  };
+
+  const formatTaxId = (value: string) => {
+    const digits = value.replace(/\D/g, ""); // keep only numbers
+    if (!digits) return "";
+    const part1 = digits.substring(0, 2);
+    const part2 = digits.substring(2, 9);
+    if (digits.length <= 2) return part1;
+    return `${part1}-${part2}`;
+  };
+
+  const formatZipCode = (value: string) => {
+    const digits = value.replace(/\D/g, ""); // only numbers
+    return digits.substring(0, 5); // limit to max 5 digits
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -179,7 +215,7 @@ const CompanySettings = () => {
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/settings">
+                <Link to="/companies">
                   <ArrowLeft className="w-4 h-4" />
                 </Link>
               </Button>
@@ -188,9 +224,13 @@ const CompanySettings = () => {
                   <Building2 className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground">Company Settings</h1>
-                  <p className="text-muted-foreground">Manage your company information and branding</p>
-                </div>
+                <h1 className="text-3xl font-bold text-foreground">
+                  {isNewCompany ? "Add Company" : "Edit Company"}
+                </h1>
+                <p className="text-muted-foreground">
+                  {isNewCompany ? "Add a new company to your account" : "Manage your company information and branding"}
+                </p>
+              </div>
               </div>
             </div>
           </div>
@@ -239,10 +279,15 @@ const CompanySettings = () => {
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
-                      id="phone"
-                      {...register("phone")}
-                      placeholder="(555) 123-4567"
-                    />
+                    id="phone"
+                    value={watch("phone")}
+                    onChange={(e) => {
+                      let formatted = formatPhone(e.target.value);
+                      // prevent input longer than 14 chars (max formatted length "(123) 456-7890")
+                      if (formatted.length <= 14) setValue("phone", formatted, { shouldDirty: true });
+                    }}
+                    placeholder="(555) 123-4567"
+                  />
                   </div>
 
                   <div className="space-y-2">
@@ -256,11 +301,16 @@ const CompanySettings = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="tax_id">Tax ID / EIN</Label>
-                    <Input
-                      id="tax_id"
-                      {...register("tax_id")}
-                      placeholder="XX-XXXXXXX"
-                    />
+                     <Input
+                    id="tax_id"
+                    value={watch("tax_id")}
+                    onChange={(e) => {
+                      let formatted = formatTaxId(e.target.value);
+                      // prevent input longer than 10 chars (max formatted length "12-3456789")
+                      if (formatted.length <= 10) setValue("tax_id", formatted, { shouldDirty: true });
+                    }}
+                    placeholder="12-3456789"
+                  />
                   </div>
                 </div>
               </CardContent>
@@ -317,10 +367,14 @@ const CompanySettings = () => {
                   <div className="space-y-2">
                     <Label htmlFor="postal_code">ZIP Code</Label>
                     <Input
-                      id="postal_code"
-                      {...register("postal_code")}
-                      placeholder="12345"
-                    />
+                    id="postal_code"
+                    value={watch("postal_code")}
+                    onChange={(e) => {
+                      const formatted = formatZipCode(e.target.value);
+                      setValue("postal_code", formatted, { shouldDirty: true });
+                    }}
+                    placeholder="12345"
+                  />
                   </div>
                 </div>
 
@@ -375,20 +429,20 @@ const CompanySettings = () => {
 
             {/* Save Button */}
             <div className="flex justify-end gap-4 pt-6">
-              <Button variant="outline" type="button" asChild>
-                <Link to="/settings">Cancel</Link>
-              </Button>
-              <Button type="submit" disabled={isLoading || !isDirty}>
-                {isLoading ? (
-                  <>Saving...</>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button variant="outline" type="button" asChild>
+              <Link to="/companies">Cancel</Link>
+            </Button>
+            <Button type="submit" disabled={isLoading || (!isDirty && !isNewCompany)}>
+              {isLoading ? (
+                <>Saving...</>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isNewCompany ? "Create Company" : "Save Changes"}
+                </>
+              )}
+            </Button>
+          </div>
           </form>
         </main>
       </div>

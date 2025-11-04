@@ -29,11 +29,11 @@ export interface AuthContextType {
     companyName?: string;
   }) => Promise<SignUpResult>;
   signIn: (param: { email: string; password: string }) => Promise<SignInResult>;
-  signOut: (param:{clearDevice: boolean}) => Promise<SignOutResult>;
+  signOut: (param: { clearDevice: boolean }) => Promise<SignOutResult>;
   resetPasswordForEmail: (email: string) => Promise<{ error?: any }>;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-
+  setUserAuthStatus: (status: AuthStatus) => void;
   enrollMfaTotp(): Promise<MfaEnrollResult>;
   verifyMfaTotp(param: {
     factorId: string;
@@ -66,8 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener FIRST
     const unsubscribe = supabaseAuthService.onAuthStateChange(
       ({ user, status, factorId, challengeId }) => {
-        
-        
+
+
         setUser(user);
         setUserAuthStatus(status);
         setMfaFactorId(factorId);
@@ -105,8 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const signOut = async (param:{clearDevice: boolean}) => {
-    if(param.clearDevice) clearDeviceToken(); // Clear device remembering token on logout
+  const signOut = async (param: { clearDevice: boolean }) => {
+    // if(param.clearDevice) clearDeviceToken(); // Clear device remembering token on logout  
     return await supabaseAuthService.signOut();
   };
 
@@ -124,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user,
     userAuthStatus,
+    setUserAuthStatus,
     signUp,
     signIn,
     signOut,
