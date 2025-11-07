@@ -1,12 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Wallet, CreditCard, ArrowDownLeft, History } from 'lucide-react';
+import { useBackend } from '@/hooks/useBackend';
+import { toast } from '@/hooks/use-toast';
 
 const Balance = () => {
+  const [amount, setAmount] = useState('');
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState('');
+  const api = useBackend();
+
+  const handleWithdrawal = async () => {
+    const withdrawalAmount = parseFloat(amount);
+    
+    if (!withdrawalAmount || withdrawalAmount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid withdrawal amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (withdrawalAmount > 2847.32) {
+      toast({
+        title: "Insufficient Balance",
+        description: "Withdrawal amount exceeds available balance",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const response = await api.requestWithdrawal({
+      amount: withdrawalAmount,
+      paymentMethodId: "bank_1234",
+    });
+
+    if (response) {
+      setIframeUrl(response.iframeUrl);
+      setShowPaymentDialog(true);
+      toast({
+        title: "Withdrawal Initiated",
+        description: "Please complete the payment verification",
+      });
+      setAmount('');
+    } else if (api.requestWithdrawal.error) {
+      toast({
+        title: "Withdrawal Failed",
+        description: api.requestWithdrawal.error,
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -93,6 +143,8 @@ const Balance = () => {
                     placeholder="0.00"
                     step="0.01"
                     min="0"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
                 
@@ -105,8 +157,12 @@ const Balance = () => {
                   </div>
                 </div>
 
-                <Button className="w-full max-w-sm">
-                  Request Withdrawal
+                <Button 
+                  className="w-full max-w-sm"
+                  onClick={handleWithdrawal}
+                  disabled={api.requestWithdrawal.loading}
+                >
+                  {api.requestWithdrawal.loading ? 'Processing...' : 'Request Withdrawal'}
                 </Button>
               </CardContent>
             </Card>
@@ -153,6 +209,23 @@ const Balance = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Payment iframe dialog */}
+          <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+            <DialogContent className="max-w-4xl h-[80vh]">
+              <DialogHeader>
+                <DialogTitle>Complete Withdrawal</DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 h-full">
+                <iframe
+                  src={iframeUrl}
+                  className="w-full h-full border-0 rounded-md"
+                  title="Payment Processor"
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
   );

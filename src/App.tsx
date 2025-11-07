@@ -29,6 +29,7 @@ import EditInvoice from "./pages/EditInvoice";
 import Auth from './pages/auth/Auth';
 import ConfirmEmailPage from './pages/auth/ConfirmEmail';
 import InvoicePublicView from './pages/InvoicePublicView';
+import InvoicePayment from './pages/InvoicePayment';
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="/invoice/:invoiceId/:token" element={<InvoicePublicView />} />
+            <Route path="/invoice/:invoiceId/:token/pay" element={<InvoicePayment />} />
 
             <Route path="/*" element={
               <SidebarProvider>

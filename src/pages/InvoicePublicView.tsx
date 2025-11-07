@@ -3,6 +3,7 @@ import { GetInvoicePublicResponse } from "@/backend/functions.types";
 import InvoiceDetail from "@/components/invoice/invoice-detail";
 import { useBackend } from "@/hooks/useBackend";
 import { useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 type Props = {};
 
@@ -54,12 +55,25 @@ const InvoicePublicView = (props: Props) => {
   // Show invoice when successfully loaded
   if (invoice) {
     return (
-      <InvoiceDetail
-        invoice={invoice as any}
-        client={{ company_name: invoice.client_name } as any}
-        loading={false}
-        isPublicView={true}
-      />
+      <div>
+        <InvoiceDetail
+          invoice={invoice as any}
+          client={{ company_name: invoice.client_name } as any}
+          loading={false}
+          isPublicView={true}
+        />
+        {invoice.status !== "paid" && (
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => window.location.href = `/invoice/${invoiceId}/${token}/pay`}
+            >
+              Pay Invoice
+            </Button>
+          </div>
+        )}
+      </div>
     );
   }
 
