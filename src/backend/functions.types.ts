@@ -60,12 +60,12 @@ export class BackendFunctions {
   requestWithdrawal: {
     functionName: string;
     request: { amount: number; paymentMethodId?: string };
-    response: { success: boolean; withdrawalId: string; iframeUrl: string };
+    response: { success: boolean; withdrawalId: string; iframeUrl: string; paymentLinkId?: string };
     method: "POST" | "GET" | "PUT" | "PATCH" | "DELETE";
   } = {
     functionName: "request-withdrawal",
     request: { amount: 0 },
-    response: { success: false, withdrawalId: "", iframeUrl: "" },
+    response: { success: false, withdrawalId: "", iframeUrl: "", paymentLinkId: "" },
     method: "POST",
   };
 
